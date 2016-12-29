@@ -423,4 +423,4 @@ I attached links where you can find/get more information about me:
 
 - [Linkedin profile](https://pl.linkedin.com/in/krzysztof-szewczyk-8486a2ba)
 - [Github account](https://github.com/christophershoemaker)
-- [Email](szewczyk.christopher@gmail.com)
+- Email to Krzysztof Szewczyk (szewczyk.christopher@gmail.com)
