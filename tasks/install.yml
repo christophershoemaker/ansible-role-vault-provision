@@ -1,0 +1,80 @@
+- name: Create group
+  group:
+    name: "{{ vault_group }}"
+    state: present
+  become: true
+
+- name: Create user
+  user:
+    name: "{{ vault_user }}"
+    comment: "Vault service"
+    group: "{{ vault_group }}"
+  become: true
+
+- name: "Create {{ vault_app_install_dir }} path"
+  file:
+    path: "{{ vault_app_install_dir }}"
+    state: directory
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: 0755
+  become: true
+
+- name: Download Vault application
+  get_url:
+    url: "{{vault_app_url}}"
+    dest: "/tmp/{{vault_app_zip}}"
+    checksum: "{{vault_app_checksum}}"
+    mode: 0644
+    group: "{{ vault_group }}"
+    owner: "{{ vault_user }}"
+  become: yes
+
+- name: Install Unzip
+  yum:
+    name: unzip
+    state: latest
+  become: yes
+
+- name: Unarchive Vault application
+  unarchive:
+    src: "/tmp/{{vault_app_zip}}"
+    dest: "{{vault_app_install_dir}}"
+    creates: "{{vault_app_install_dir}}/{{vault_app}}"
+    copy: no
+  become: yes
+
+- name: Give the Vault executable the ability to use the mlock syscall
+  capabilities:
+    path: "{{ vault_app_install_dir }}/{{vault_app}}"
+    capability: cap_ipc_lock+ep
+    state: present
+  become: true
+  when: not vault_configuration.disable_mlock
+
+- name: Generate systemd file
+  template:
+    src: vault.service.j2
+    dest: "/etc/systemd/system/vault.service"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: 0644
+  become: true
+
+- name: Generate config
+  template:
+    src: config.hcl.j2
+    dest: "{{ vault_app_install_dir }}/config.hcl"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: 0644
+  become: true
+  register: generate_config
+
+- name: Restart vault
+  service:
+    name: vault
+    state: restarted
+    enabled: yes
+  become: true
+  when: generate_config.changed

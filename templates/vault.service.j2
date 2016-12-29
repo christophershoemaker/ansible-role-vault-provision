@@ -1,0 +1,12 @@
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+User=vault
+Group=vault
+EnvironmentFile=-{{ vault_app_install_dir }}
+Restart=on-failure
+ExecStart={{ vault_app_install_dir }}/vault server -config={{ vault_app_install_dir }}/config.hcl
+
+[Install]
+WantedBy=multi-user.target

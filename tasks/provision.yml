@@ -1,0 +1,136 @@
+- name: Check the initialization status
+  uri:
+    url: "{{ method }}://{{ vault_domain_name }}:{{ vault_configuration.listener.tcp.address.split(':')[1] }}/{{ vault_api_version }}/sys/init"
+    method: GET
+    status_code: 200
+  register: get_init_output
+
+- debug:
+    var: get_init_output
+    verbosity: 4
+
+- name: Initialization
+  uri:
+    url: "{{ method }}://{{ vault_domain_name }}:{{ vault_configuration.listener.tcp.address.split(':')[1] }}/{{ vault_api_version }}/sys/init"
+    method: PUT
+    body: "{ 'secret_shares': {{ initialization.pgp_keys|length }}, 'secret_threshold': {{ initialization.secret_threshold }}, 'pgp_keys': {{  initialization.pgp_keys }} , 'root_token_pgp_key': '{{ initialization.root_token_pgp_key }}' }"
+    body_format: json
+    status_code: 200
+  when: not get_init_output.json.initialized
+  register: initialization
+
+- debug:
+    var: initialization
+
+- name: Check seal status
+  uri:
+    url: "{{ method }}://{{ vault_domain_name }}:{{ vault_configuration.listener.tcp.address.split(':')[1] }}/{{ vault_api_version }}/sys/seal-status"
+    method: GET
+    status_code: 200
+  register: seal_status
+ 
+- debug:
+    var: seal_status
+    verbosity: 4
+
+- name: Create policies
+  uri:
+    url: "{{ method }}://{{ vault_domain_name }}:{{ vault_configuration.listener.tcp.address.split(':')[1] }}/{{ vault_api_version }}/sys/policy/{{ item.name }}"
+    method: POST
+    body: "{{ item.data }}"
+    body_format: json
+    status_code: 204
+    headers:
+      X-Vault-Token: "{{ vault_token }}" 
+  when: vault_token is defined and vault_token != "" and not seal_status.json.sealed
+  with_items: "{{ policies }}"
+  register: create_policies
+
+- debug:
+    var: create_policies
+    verbosity: 4
+
+- name: Get tokens statuses
+  uri:
+    url: "{{ method }}://{{ vault_domain_name }}:{{ vault_configuration.listener.tcp.address.split(':')[1] }}/{{ vault_api_version }}/auth/token/lookup"  
+    method: POST
+    body: "{ 'token': '{{ item.id }}' }"
+    body_format: json
+    status_code: 200,403 #200 is returned if token already exist, 403 if token don't exist 
+    headers:
+      X-Vault-Token: "{{ vault_token }}"
+  when: vault_token is defined and vault_token != "" and not seal_status.json.sealed
+  with_items: "{{ tokens }}"
+  register: tokens_statuses
+
+- debug:
+    var: tokens_statuses
+    verbosity: 4
+
+- name: Creating tokens
+  uri:
+    url: "{{ method }}://{{ vault_domain_name }}:{{ vault_configuration.listener.tcp.address.split(':')[1] }}/{{ vault_api_version }}/auth/token/create"  
+    method: POST
+    body: "{{ item['item'] }}"
+    body_format: json
+    status_code: 200
+    headers:
+      X-Vault-Token: "{{ vault_token }}"
+  when: vault_token is defined and vault_token != "" and not seal_status.json.sealed and item.status|int == 403 and item.json.errors[0] == 'bad token'
+  with_items: "{{ tokens_statuses.results }}"
+  register: creating_tokens
+
+- debug:
+    var: creating_tokens
+    verbosity: 4
+
+- name: Get backends
+  uri:
+    url: "{{ method }}://{{ vault_domain_name }}:{{ vault_configuration.listener.tcp.address.split(':')[1] }}/{{ vault_api_version }}/sys/mounts"
+    method: GET
+    status_code: 200
+    HEADER_X-Vault-Token: "{{ vault_token }}"
+  when: vault_token is defined and vault_token != "" and not seal_status.json.sealed
+  register: get_backend_output
+
+- debug:
+    var: get_backend_output
+    verbosity: 4
+
+- name: Create backends
+  uri:
+    url: "{{ method }}://{{ vault_domain_name }}:{{ vault_configuration.listener.tcp.address.split(':')[1] }}/{{ vault_api_version }}/sys/mounts/{{ item.backend_name }}"
+    method: POST
+    body: "{ \"type\": \"{{ item.type }}\" }"
+    body_format: json
+    status_code: 204
+    headers:
+      X-Vault-Token: "{{ vault_token }}"
+      Content-Type: "{{ content_type }}"
+  when: vault_token is defined and vault_token != "" and not seal_status.json.sealed and item.backend_name not in (get_backend_output.json.data.keys() | join (' ') | regex_replace('/', '')).split()
+  with_items: "{{ backends }}"
+  register: create_backends
+
+- debug:
+    var: create_backends
+    verbosity: 4
+
+- name: Provision vault with data
+  uri:
+    url: "{{ method }}://{{ vault_domain_name }}:{{ vault_configuration.listener.tcp.address.split(':')[1] }}/{{ vault_api_version }}/{{ item.0.backend_name }}/{{ item.1.container_name }}"
+    method: POST
+    body: "{{ item.1.data }}"
+    body_format: json
+    status_code: 204
+    headers:
+      X-Vault-Token: "{{ vault_token }}"
+      Content-Type: "{{ content_type }}"
+  when: vault_token is defined and vault_token != "" and not seal_status.json.sealed
+  with_subelements:
+    - "{{ backends }}"
+    - secrets
+  register: provision_vault_with_data
+
+- debug:
+    var: provision_vault_with_data
+    verbosity: 4

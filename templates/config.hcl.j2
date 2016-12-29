@@ -1,0 +1,95 @@
+# Config file for Hashicorp Vault.
+# Please read https://www.vaultproject.io/docs/config/index.html for a list of options.
+# 
+# {{ ansible_managed }}
+
+##############################################################################
+# Backend section                                                            #
+##############################################################################
+
+backend "{{ backend_type }}" {
+{% for key,value in vault_configuration.backend[backend_type]|dictsort %}
+{% if value|string == 'True' or value|string == 'False' %}
+  {{ key }} = {{ value|bool|lower }}
+{% elif value is number %}
+  {{ key }} = {{ value }}
+{% elif value is string %}
+  {{ key }} = "{{ value }}"
+{% elif value is iterable and value is not mapping %}
+  {{ key }} = [ "{{ value|join('", "') }}" ]
+{% endif %}
+{% endfor %}
+{% if vault_configuration.backend.ha_options is defined %}
+{% for key,value in vault_configuration.backend.ha_options|dictsort %}
+{% if value|string == 'True' or value|string == 'False' %}
+  {{ key }} = {{ value|bool|lower }}
+{% elif value is number %}
+  {{ key }} = {{ value }}
+{% elif value is string %}
+  {{ key }} = "{{ value }}"
+{% elif value is iterable and value is not mapping %}
+  {{ key }} = [ "{{ value|join('", "') }}" ]
+{% endif %}
+{% endfor %}
+{% endif %}
+}
+
+##############################################################################
+# Listener section                                                           #
+##############################################################################
+
+{% for type, properties in vault_configuration.listener.iteritems() %}
+listener "{{ type }}" {
+{% for key,value in properties|dictsort %}
+{% if value|string == 'True' or value|string == 'False' %}
+  {{ key }} = {{ value|bool|lower }}
+{% elif value is number %}
+  {{ key }} = {{ value }}
+{% elif value is string %}
+  {{ key }} = "{{ value }}"
+{% elif value is iterable and value is not mapping %}
+  {{ key }} = [ "{{ value|join('", "') }}" ]
+{% endif %}
+{% endfor %}
+}
+{% endfor %}
+{% if vault_configuration.telemetry is defined %}
+##############################################################################
+# Telemetry section                                                          #
+##############################################################################
+
+telemetry {
+{% for key,value in vault_configuration.telemetry|dictsort %}
+{% if value|string == 'True' or value|string == 'False' %}
+  {{ key }} = {{ value|bool|lower }}
+{% elif value is number %}
+  {{ key }} = {{ value }}
+{% elif value is string %}
+  {{ key }} = "{{ value }}"
+{% elif value is iterable and value is not mapping %}
+  {{ key }} = [ "{{ value|join('", "') }}" ]
+{% endif %}
+{% endfor %}
+}
+{% endif %}
+
+##############################################################################
+# General section                                                            #
+##############################################################################
+
+{% if vault_configuration.disable_mlock is defined %}disable_mlock = {{ vault_configuration.disable_mlock | bool | lower}}
+{% endif %}
+{% if vault_configuration.ha_backend is defined %}ha_backend = {{ vault_configuration.ha_backend }}
+{% endif %}
+{% if vault_configuration.cluster_name is defined %}cluster_name = "{{ vault_configuration.cluster_name }}"
+{% endif %}
+{% if vault_configuration.cache_size is defined %}cache_size = {{ vault_configuration.cache_size }}
+{% endif %}
+{% if vault_configuration.disable_cache is defined %}disable_cache = {{ vault_configuration.disable_cache | bool | lower}}
+{% endif %}
+{% if vault_configuration.default_lease_ttl is defined %}default_lease_ttl = {{ vault_configuration.default_lease_ttl }}
+{% endif %}
+{% if vault_configuration.max_lease_ttl is defined %}max_lease_ttl = {{ vault_configuration.max_lease_ttl }}
+{% endif %}
+{% if vault_configuration.ui is defined %}ui = {{ vault_configuration.ui }}
+{% endif %}

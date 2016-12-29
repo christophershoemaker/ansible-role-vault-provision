@@ -1,0 +1,7 @@
+---
+- name: Provision vault
+  hosts: all
+  vars_files:
+    - vaultvariables.yml
+  roles:
+    - vault-provision

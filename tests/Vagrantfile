@@ -1,0 +1,22 @@
+boxes = {
+        'vaultprovision' => '10'
+}
+
+Vagrant.configure("2") do |config|
+  boxes.each do |key, value|
+    config.vm.define "#{key}" do |config|
+      config.ssh.insert_key = false
+      config.vm.box = "centos/7"
+      config.vm.hostname = "#{key}"
+      config.vm.network :private_network, ip: "192.168.60.#{value}", netmask: "255.255.255.0"
+      config.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      end
+      config.vm.provision 'ansible' do |ansible|
+        ansible.playbook = 'test.yml'
+        ansible.extra_vars = 'extra_vars.yml'
+        #ansible.verbose = '-vvvv'
+      end
+    end
+  end
+end

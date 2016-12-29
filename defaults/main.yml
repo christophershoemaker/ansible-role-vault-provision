@@ -1,0 +1,199 @@
+---
+# defaults file for vault-provision
+
+### ########################################################### ###
+### General section                                             ###
+### ########################################################### ###
+
+vault_app_mirror: 'https://releases.hashicorp.com'
+vault_app_platform : 'linux_amd64'
+vault_app_install_dir : '/opt/vault'
+
+vault_app: vault
+vault_app_ver: '0.6.4'
+vault_app_checksum: sha256:04d87dd553aed59f3fe316222217a8d8777f40115a115dac4d88fac1611c51a6
+
+vault_app_name : '{{vault_app}}_{{vault_app_ver}}_{{vault_app_platform}}'
+vault_app_zip : '{{vault_app_name}}.zip'
+vault_app_url : '{{vault_app_mirror}}/{{vault_app}}/{{vault_app_ver}}/{{vault_app_zip}}'
+
+method: http
+vault_domain_name: vault.your.domain
+vault_api_version: v1
+content_type: application/json
+
+vault_user: vault
+vault_group: vault
+
+backend_type: file
+
+### ########################################################### ###
+### Configuration section                                       ###
+### ########################################################### ###
+
+vault_configuration:
+  backend:
+    consul:
+      path: vault
+      address: 127.0.0.1:8500
+      scheme:
+      check_timeout:
+      disable_registration:
+      service:
+      service_tags:
+      token:
+      max_parallel:
+      tls_skip_verify:
+      tls_min_version:
+      tls_ca_file:
+      tls_cert_file:
+      tls_key_file:
+    etcd:
+      path:
+      address:
+      sync:
+      ha_enabled:
+      username:
+      password:
+      tls_ca_file:
+      tls_cert_file:
+      tls_key_file:
+    zookeeper:
+      path:
+      address:
+      auth_info:
+      znode_owner:
+    dynamodb:
+      access_key:
+      secret_key:
+      table:
+      read_capacity:
+      write_capacity:
+      session_token:
+      endpoint:
+      region:
+      max_parallel:
+      ha_enabled:
+      recovery_mode:
+    s3:
+      bucket: bucket_name
+      access_key: AKIAJWVN5Z4FOFT7NLNA
+      secret_key: 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
+      session_token:
+      endpoint:
+      region: us-east-1
+    gcs:
+      bucket:
+      credentials_file:
+      max_parallel:
+    azure:
+      accountName:
+      accountKey:
+      container:
+      max_parallel:
+    swift:
+      container:
+      username:
+      password:
+      auth_url:
+      tenant:
+      max_parallel:
+    mysql:
+      username:
+      password:
+      address:
+      database:
+      table:
+      tls_ca_file:
+    postgresql:
+      connection_url:
+      table:
+    inmem:
+    file:
+      path: /opt/vault/storage
+    ha_options:
+      redirect_addr:
+      cluster_addr:
+      disable_clustering:
+  listener: #"tcp" and "atlas" are valid values
+    tcp:
+      address: 0.0.0.0:8200
+      tls_disable: 1
+      #cluster_address:
+      #tls_cert_file:
+      #tls_key_file:
+      #tls_min_version:
+    #atlas:
+      #endpoint:
+      #infrastructure:
+      #node_id:
+      #token:
+  # telemetry:
+  #   statsite_address:
+  #   statsd_address:
+  #   disable_hostname:
+  #   circonus_api_token:
+  #   circonus_api_app:
+  #   circonus_api_url:
+  #   circonus_submission_interval:
+  #   circonus_submission_url:
+  #   circonus_check_id:
+  #   circonus_check_force_metric_activation:
+  #   circonus_check_instance_id:
+  #   circonus_check_search_tag:
+  #   circonus_check_display_name:
+  #   circonus_check_tags:
+  #   circonus_broker_id:
+  #   circonus_broker_select_tag:
+  #ha_backend:
+  #cluster_name:
+  #cache_size:
+  disable_cache: false
+  disable_mlock: false
+  #default_lease_ttl:
+  #max_lease_ttl:
+  #ui:
+
+### ########################################################### ###
+### Provision section                                           ###
+### ########################################################### ###
+
+backends:
+  - backend_name: secret
+    type: generic
+    path: secret
+    secrets:
+      - container_name: authcredentials
+        data:
+          username: password
+          david: superstrongpasswordfordavid
+          daniel: superstrongpasswordfordaniel
+      - container_name: privatekeys
+        data:
+          key_name: encryptedkey
+          key_for_mail: enctryptedkeyformail
+  - backend_name: test
+    type: generic
+    path: test
+    secrets:
+      - container_name: test_container
+        data:
+          important_data: importantdatavalue
+          another_important_data: anotherimportantdatavalue
+
+initialization:
+  root_token_pgp_key: mQENBFhZFd4BCADGj9gcnJHRwQk1UL8BxTugxmJ6uk82S837LWqzrsDv18zObBQK8bmTFps4x6DrUbLbxzHRB7kxbR5g/KN2qCqMYcYkKgLqMqo9XaS4vCriQKCFaZ3FWG99/TxUurPpy+crVCDun8UMGmWZCvRu7UBJQsAF1htukVhdEXAd1116WRD6W5k/+X6B6FvSAD7ud/PWUENdtLxiRgBVhRCHWPlJvdA7I7EaBjF5TMbwFP4wlSHxbdrWZ0z9wGk5FFbtl1qlNaojyJR1Gs3a7T7lB7y1dr6Y727JAYHP5uzQo06F0nfQm58sXtmeBnyhOHZ04BzXBik+Uoh9Bh1Uj7em0cP5ABEBAAG0T0tyenlzenRvZiBTemV3Y3p5ayAoRW5jcnlwdGlvbiBrZXkgZm9yIEhhc2hpY29ycCBWYXVsdCkgPGsuc3pld2N6eWtAa2Fpbm9zLmNvbT6JAT4EEwECACgFAlhZFd4CGwMFCQHhM4AGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJEMOj6FrFv4ik9bsH/3gmLKh8r2xhsbA79bEzBjNPDX9G6qeHfea+RMRjLH5yvNH9/Hnjwkqn3LIAdpzacldrjZMEpqS5z310gxk+cyNB/dFe/Wqmh1UQljDQ354qAZAtQ7OLuypVsg+tI8aIRQieCEC4Ck/h8xnAK8AoOHb29vR+BMNdqp+TNrDrAeYAKchmJiWcYxt5YqT4AP5JRzT82o2Sms3ihyFe1KxgcNbrNjJpEMoCnu8l5e1RrlIeMU8Hm5Mms1ZvausPfFlsa76shhOCZMfZ2acsuuTRqx8ed8UrSmDqAiia60BupsfRfMkqf/GdkEEESoRKhz1EHAUQiC9Flshyl/CjWqCIQCi5AQ0EWFkV3gEIAKLrtH904COoJhOjdqUQNSGu0TSsNik2Hd/v5A5KxG7a2iiqLOD73VvINaTHpwUjkWR3OcgRuqsnshST/qg3T1t8gghON70Pg6nKEPbDGabhA19fQ64woSvY6I2ZTv/XY0CxxDAVNN2O3rpl6ZnUgQBVjd/u4Nx3cydf30MnPtipb9bJ1ISZvWtMAYxAeiqd/6rcj/BXSQBt05ffDwPBd5+7pL7gQrJTa51icggKq06KwTfSdi0cPmqvOenKZB0exrp2jtxw1+QIhlhJJyv33fxaJHZaFqlh7vn6j7e03J4UaVPl5h/fnNg3i1uJJW9E6ECfAwRy394r7V1LUZ/GiEMAEQEAAYkBJQQYAQIADwUCWFkV3gIbDAUJAeEzgAAKCRDDo+haxb+IpJFmB/99Ss1U/dJA/XFwWofj3iEDM3W7OJoahYJLD7eOo3lPT8vNnLEVOPkSPjvaggkSsM3Xp5WZw2/oQ3p5KuIE2bSGK/Ok8zEAjEbn5vT4GNTBSH070OAQEHD5dEcYmh9EKSnitPXlLMOG/szsnReimBjLXRibU2wvuMeY7QO58K9kHm1K9cpNWuU5h8M4CMlBATvfl4ZeIBm6K9gmqKKxkF+7Mw1U8XG/OZv6GQwbMER3h7cdsor9LsOZTIdZW7bj9Iyh42hZHMcWq1E2VvHuklwJdpZfKlUs6b/6WwSPsypLLfHnO6C/G726MXH2JuZe5/fFpn+skxgbYNZ1y1BTnyvs
+  secret_threshold: 1
+  pgp_keys:
+   - mQENBFhZFd4BCADGj9gcnJHRwQk1UL8BxTugxmJ6uk82S837LWqzrsDv18zObBQK8bmTFps4x6DrUbLbxzHRB7kxbR5g/KN2qCqMYcYkKgLqMqo9XaS4vCriQKCFaZ3FWG99/TxUurPpy+crVCDun8UMGmWZCvRu7UBJQsAF1htukVhdEXAd1116WRD6W5k/+X6B6FvSAD7ud/PWUENdtLxiRgBVhRCHWPlJvdA7I7EaBjF5TMbwFP4wlSHxbdrWZ0z9wGk5FFbtl1qlNaojyJR1Gs3a7T7lB7y1dr6Y727JAYHP5uzQo06F0nfQm58sXtmeBnyhOHZ04BzXBik+Uoh9Bh1Uj7em0cP5ABEBAAG0T0tyenlzenRvZiBTemV3Y3p5ayAoRW5jcnlwdGlvbiBrZXkgZm9yIEhhc2hpY29ycCBWYXVsdCkgPGsuc3pld2N6eWtAa2Fpbm9zLmNvbT6JAT4EEwECACgFAlhZFd4CGwMFCQHhM4AGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJEMOj6FrFv4ik9bsH/3gmLKh8r2xhsbA79bEzBjNPDX9G6qeHfea+RMRjLH5yvNH9/Hnjwkqn3LIAdpzacldrjZMEpqS5z310gxk+cyNB/dFe/Wqmh1UQljDQ354qAZAtQ7OLuypVsg+tI8aIRQieCEC4Ck/h8xnAK8AoOHb29vR+BMNdqp+TNrDrAeYAKchmJiWcYxt5YqT4AP5JRzT82o2Sms3ihyFe1KxgcNbrNjJpEMoCnu8l5e1RrlIeMU8Hm5Mms1ZvausPfFlsa76shhOCZMfZ2acsuuTRqx8ed8UrSmDqAiia60BupsfRfMkqf/GdkEEESoRKhz1EHAUQiC9Flshyl/CjWqCIQCi5AQ0EWFkV3gEIAKLrtH904COoJhOjdqUQNSGu0TSsNik2Hd/v5A5KxG7a2iiqLOD73VvINaTHpwUjkWR3OcgRuqsnshST/qg3T1t8gghON70Pg6nKEPbDGabhA19fQ64woSvY6I2ZTv/XY0CxxDAVNN2O3rpl6ZnUgQBVjd/u4Nx3cydf30MnPtipb9bJ1ISZvWtMAYxAeiqd/6rcj/BXSQBt05ffDwPBd5+7pL7gQrJTa51icggKq06KwTfSdi0cPmqvOenKZB0exrp2jtxw1+QIhlhJJyv33fxaJHZaFqlh7vn6j7e03J4UaVPl5h/fnNg3i1uJJW9E6ECfAwRy394r7V1LUZ/GiEMAEQEAAYkBJQQYAQIADwUCWFkV3gIbDAUJAeEzgAAKCRDDo+haxb+IpJFmB/99Ss1U/dJA/XFwWofj3iEDM3W7OJoahYJLD7eOo3lPT8vNnLEVOPkSPjvaggkSsM3Xp5WZw2/oQ3p5KuIE2bSGK/Ok8zEAjEbn5vT4GNTBSH070OAQEHD5dEcYmh9EKSnitPXlLMOG/szsnReimBjLXRibU2wvuMeY7QO58K9kHm1K9cpNWuU5h8M4CMlBATvfl4ZeIBm6K9gmqKKxkF+7Mw1U8XG/OZv6GQwbMER3h7cdsor9LsOZTIdZW7bj9Iyh42hZHMcWq1E2VvHuklwJdpZfKlUs6b/6WwSPsypLLfHnO6C/G726MXH2JuZe5/fFpn+skxgbYNZ1y1BTnyvs
+
+policies:
+  - name: testpolicy
+    data:
+      rules: "path \"secret/authcredentials\" {\n  policy = \"read\"\n}\npath \"test/test_container\" {\n  policy = \"read\"\n}\npath \"auth/token/lookup-self\" {\n  policy = \"read\"\n}"
+
+tokens:
+  - display_name: test_token
+    id: 950938df-50cb-7a24-faeh-b4f2a23g3b6f
+    policies:
+      - testpolicy
