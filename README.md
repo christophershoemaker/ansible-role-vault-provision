@@ -4,7 +4,7 @@ The Ansible role for install and configure vault and then provision variables on
 
 ## Requirements
 
-This role require Ansible 2.0.
+This role requires Ansible 2.0 or higher.
 
 ## Role Variables
 
@@ -37,14 +37,14 @@ content_type: application/json # The content type of the http body request
 vault_user: vault # Group which is allowed to run vault service
 vault_group: vault # User which is allowed to run vault service
 
-backend_type: file # backend used by you. All possible supported backends are listed at https://www.vaultproject.io/docs/config/index.html website
+backend_type: file # backend used by you. All possible supported backends are listed at [`https://www.vaultproject.io/docs/config/index.html`](https://www.vaultproject.io/docs/config/index.html).
 ```
 
 #### Configuration part
 
 
 
-Variables for Configuration part are well described at vault website `https://www.vaultproject.io/docs/config/index.html`. Basicly variable names in this module reflect these in vault config documentation. You can define more than one vault_configuration.backend variable but just one will be use and you have to specify which one in `backend_type` variable in general section. The module is flexible and `backend_type` variable can be whatever backend which is supperted by Vault. In your config please keep only variables which is used by you. Rest of the variables can be commented out or just removed. For now all possible configuration variables are mention below:
+Variables for Configuration part are well described at vault website [`https://www.vaultproject.io/docs/config/index.html`](https://www.vaultproject.io/docs/config/index.html). Basicly variable names in this module reflect these in vault config documentation. You can define more than one vault_configuration.backend variable but just one will be use and you have to specify which one in `backend_type` variable in general section. The module is flexible and `backend_type` variable can be whatever backend which is supperted by Vault. In your config please keep only variables which is used by you. Rest of the variables can be commented out or just removed. For now all possible configuration variables are mention below:
 
 ```
 ### ########################################################### ###
@@ -358,6 +358,42 @@ The result of the above command will be your decrypted key which is necessary to
 
 Notice: If `vault_token` variable is empty then second provision cycle will be skipped.
 
+## Sample curl queries to debug vault on localhost
+
+##### Check whether vault is initialized
+
+`curl -X GET http://127.0.0.1:8200/v1/sys/init`
+
+##### Vault initialization
+
+Simple initialization without - root token and keys will be output in plaintext:
+
+`curl -X GET -d '{"secret_shares": 1, "secret_threshold": 1}' http://127.0.0.1:8200/v1/sys/init`
+
+Intialization with root token and keys encryption:
+
+`curl -X PUT -d '{"root_token_pgp_key":"mQENBFhZPkcBCADNApFjN/XvU/yeF4SRoHWzcEmummdMop6GiJg+ji//RPpCqzTY2ww3insb/2alLn7/V5LfuOIIfCFId76sWh0ckIXMdC9EOWlkmJi+Vlncq1Q/KRrE0WyUr8AaAFTbc51AAtUWWR9JW+0GwEpJxTkD9nwdU9Q5o+QKjj8BQ83UdzsnY8hUxSxnyiuufC+XWphUJLeXbJnKaaLs4gu/hoJ6SThEta2vg3B4nXGj3a3U3NuMnmzTlHbODB+bmhSjby68JKflgcQm8kpfxj/+56oX7fGn2xscWA8lBq3GkCFAqzf8j4S1+yJrLgI6//Qv1upYC9UbfYSkzhGPhOHvZL4BABEBAAG0QUtyenlzenRvZiBTemV3Y3p5ayAoRm9yIEhhc2hpb2NvcnAgVmF1bHQpIDxrLnN6ZXdjenlrQGthaW5vcy5jb20+iQE/BBMBAgApBQJYWT5HAhsDBQkDwmcABwsJCAcDAgEGFQgCCQoLBBYCAwECHgECF4AACgkQdL+2Ckh/nsDrZgf/X4Rib24zkLd57TcaKa1/exbRXi5LvC9/EQKeBAr1+SjYqJptgxpZkjcLL3D3d7Uzj8PFHpDy4u8HSEunCG6WtOmeJcTocVIOB2sHor/4jGCazo/Q50mg4ui6totH55Jn0uCxjwB2Mv+ypbE6I9iI25srxkfo06t1tbPcGoGqxSvJdNSlemdmgOphjcIk5uuK5LWD8jbt6TYx66sb0Patl5i77pvuFrBnq8WWVNe1NUpO+oNggMfxaW2RMVYXJRC/S7eH6GIpsPo+h/S4V6037bfeVzUvRcYvdZvL3PQpI7QehweUw6I96SCVASNLGBcWc3LnpTpEnHu98C5IxotCILkBDQRYWT5HAQgAyv4RIYutp1xkdzRTWNsh8ATVgM9q0ly9/qICGWfpvYvH16athvWCxt+ZWxEIFeuD03sLpHf21CR1E6+RH2y3w7Hj9WJGBZuiVNrOZU8tqfvr2N6XR81+re+ajwC5OS9hz0M+G7SN6V/cP4rHnEHVSPqvimD2vM9ahd6cqM1TyBVrwMsXfNshlDlJo7XZR3IbRd1QJLtIND+6Dbi87w64xJU5JbqjOib9Uvt5tYwT735j39k52xEvIRMgkclENBvxdb+J9stXOl7jl0WEBZOslfsmwc9KsNtQeDpDIo5gcEZkKBLyJnG3zMPzy4uBa31wSNzDCef98ytSLuXwipfZqwARAQABiQElBBgBAgAPBQJYWT5HAhsMBQkDwmcAAAoJEHS/tgpIf57A5RoH/3Y8E1fdS5KMhom33XuR+hW/A4cCsNWk5Y9OrQ+p5Beegubk1QVn8/QWWwT4IbmcFrOv/KkfO39gamL4W6t2G4Se+Oww2aHIx6BkSOnoxORLh4b0/tMUEk6hv+XxnfCyBBN661EdWAZx0U61KTIoh5PAUUKEECgSOA/C/o8iC2RcQZ157sd0JVyT3QoHF4t24y9IpK7ktOm5xEz53PFc+HeTjcSjhQwD3BRQmyWgEHt+ET+FRvpJLdjx4A2VZXqLYKeQMfwwtyijjkGTHUf5OcPAyErkFR9qQUym2adQ4NLbsmNYcnFN5JNPkzqk48v3ueEMAMTBa7OneaGAJoQdhJk=","secret_shares": 1, "secret_threshold": 1, "pgp_keys": [ "mQENBFhZPkcBCADNApFjN/XvU/yeF4SRoHWzcEmummdMop6GiJg+ji//RPpCqzTY2ww3insb/2alLn7/V5LfuOIIfCFId76sWh0ckIXMdC9EOWlkmJi+Vlncq1Q/KRrE0WyUr8AaAFTbc51AAtUWWR9JW+0GwEpJxTkD9nwdU9Q5o+QKjj8BQ83UdzsnY8hUxSxnyiuufC+XWphUJLeXbJnKaaLs4gu/hoJ6SThEta2vg3B4nXGj3a3U3NuMnmzTlHbODB+bmhSjby68JKflgcQm8kpfxj/+56oX7fGn2xscWA8lBq3GkCFAqzf8j4S1+yJrLgI6//Qv1upYC9UbfYSkzhGPhOHvZL4BABEBAAG0QUtyenlzenRvZiBTemV3Y3p5ayAoRm9yIEhhc2hpb2NvcnAgVmF1bHQpIDxrLnN6ZXdjenlrQGthaW5vcy5jb20+iQE/BBMBAgApBQJYWT5HAhsDBQkDwmcABwsJCAcDAgEGFQgCCQoLBBYCAwECHgECF4AACgkQdL+2Ckh/nsDrZgf/X4Rib24zkLd57TcaKa1/exbRXi5LvC9/EQKeBAr1+SjYqJptgxpZkjcLL3D3d7Uzj8PFHpDy4u8HSEunCG6WtOmeJcTocVIOB2sHor/4jGCazo/Q50mg4ui6totH55Jn0uCxjwB2Mv+ypbE6I9iI25srxkfo06t1tbPcGoGqxSvJdNSlemdmgOphjcIk5uuK5LWD8jbt6TYx66sb0Patl5i77pvuFrBnq8WWVNe1NUpO+oNggMfxaW2RMVYXJRC/S7eH6GIpsPo+h/S4V6037bfeVzUvRcYvdZvL3PQpI7QehweUw6I96SCVASNLGBcWc3LnpTpEnHu98C5IxotCILkBDQRYWT5HAQgAyv4RIYutp1xkdzRTWNsh8ATVgM9q0ly9/qICGWfpvYvH16athvWCxt+ZWxEIFeuD03sLpHf21CR1E6+RH2y3w7Hj9WJGBZuiVNrOZU8tqfvr2N6XR81+re+ajwC5OS9hz0M+G7SN6V/cP4rHnEHVSPqvimD2vM9ahd6cqM1TyBVrwMsXfNshlDlJo7XZR3IbRd1QJLtIND+6Dbi87w64xJU5JbqjOib9Uvt5tYwT735j39k52xEvIRMgkclENBvxdb+J9stXOl7jl0WEBZOslfsmwc9KsNtQeDpDIo5gcEZkKBLyJnG3zMPzy4uBa31wSNzDCef98ytSLuXwipfZqwARAQABiQElBBgBAgAPBQJYWT5HAhsMBQkDwmcAAAoJEHS/tgpIf57A5RoH/3Y8E1fdS5KMhom33XuR+hW/A4cCsNWk5Y9OrQ+p5Beegubk1QVn8/QWWwT4IbmcFrOv/KkfO39gamL4W6t2G4Se+Oww2aHIx6BkSOnoxORLh4b0/tMUEk6hv+XxnfCyBBN661EdWAZx0U61KTIoh5PAUUKEECgSOA/C/o8iC2RcQZ157sd0JVyT3QoHF4t24y9IpK7ktOm5xEz53PFc+HeTjcSjhQwD3BRQmyWgEHt+ET+FRvpJLdjx4A2VZXqLYKeQMfwwtyijjkGTHUf5OcPAyErkFR9qQUym2adQ4NLbsmNYcnFN5JNPkzqk48v3ueEMAMTBa7OneaGAJoQdhJk="] }' http://127.0.0.1:8200/v1/sys/init`
+
+##### Get list of Vault's backends
+
+`curl -H "X-Vault-Token: your_root_token" -X GET http://127.0.0.1:8200/v1/sys/mounts`
+
+##### Create backend named test
+
+`curl -H "X-Vault-Token: 95211491-8aa6-276f-244c-b928fad2db6b" -H "Content-Type: application/json" -X POST -d '{"type":"generic"}' http://127.0.0.1:8200/v1/sys/mounts/test`
+
+##### Get list of accessor tokens
+
+`curl -H "X-Vault-Token: 8fed6929-55c4-2a89-64b9-2b024f264bee" -X LIST  http://127.0.0.1:8200/v1/auth/token/accessors`
+
+##### Get list of policies
+
+`curl -X GET http://127.0.0.1:8200/v1/sys/policy`
+
+##### Create container named "example" in secret backend and output all these key*, vaules* in the "example" container.
+
+`curl -H "X-Vault-Token: c5a83750-9f58-4a8e-da5e-285189a698e8" -H "Content-Type: application/json" -X POST -d '{"key1":"value1", "key2": "value2"}' http://127.0.0.1:8200/v1/secret/example`
+
 ## Test
 
 The tests directory contains tests for this role in the form of a Vagrant environment. After executing vagrant up in that directory, you should get an environment with one VM, attached to VirtualBox's default NAT network (Internet access is required to get vault package and dependencies).
@@ -383,8 +419,8 @@ MIT
 ## Author Information
 
  
-I attached links where you can find more information about me:
+I attached links where you can find/get more information about me:
 
-- Linkedin: https://pl.linkedin.com/in/krzysztof-szewczyk-8486a2ba
-- Github account: https://github.com/christophershoemaker
-- Email: szewczyk.christopher@gmail.com
+- [Linkedin profile](https://pl.linkedin.com/in/krzysztof-szewczyk-8486a2ba)
+- [Github account](https://github.com/christophershoemaker)
+- [Email](szewczyk.christopher@gmail.com)
