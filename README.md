@@ -17,6 +17,9 @@ Variable part is devided into three sections:
 ### ########################################################### ###
 ### General section                                             ###
 ### ########################################################### ###
+
+vault_token: "{{ lookup('env', 'VAULT_TOKEN') }}" # token to provision vault is taken from environment variables, unless you provide vault_token by extra vars or you override this value by your ansible variable
+
 vault_app_mirror: 'https://releases.hashicorp.com' # Package repository
 vault_app_platform: 'linux_amd64' # Which one platform are you interested in 
 vault_app_install_dir: '/opt/vault' # Instalation directory where vault will be installed
@@ -225,13 +228,21 @@ tokens: # Array of the tokens that will be created
 
 ### Another required variables:
 
-During the first cycle of running this role the initialization process is performed. The unseal keys and vault root token are outputted and these values are encrypted by pgp_keys. The provisioning process is skipped. You have to depcypt the unseal keys. Then you have to unseal in some way (ssh to the machine and unseal vault by providing the decrypted keys or you define some jenkins job in continues integration tool which do it for you). The way how would you like to do it is up to you.
+During the first cycle of running this role the initialization process is performed. The unseal keys and vault root token are outputted and these values are encrypted by pgp_keys. The provisioning process is skipped. You have to depcypt the unseal keys. Then you have to unseal in some way (ssh to the machine and unseal vault by providing the decrypted keys or you define some job in continues integration tool which do it for you). The way how would you like to do it is up to you.
 
-When you have Vault unsealed then decrypt vault root token and put decrypted value as a vault_token variable. Then you can define this value in your ansible in vars or you can call ansible with extra vars parameter like this:  
+When you have Vault unsealed then decrypt vault root token and put decrypted value as a vault_token variable. Then you can define this value in your ansible in vars or set VAULT_TOKEN environment variable or call ansible with extra vars parameter like this:
 
-`ansible-playbook -i "<ip_address>," vault.yml --extra-vars '{"vault_token":"de4cdf73-3b4d-4762-09f5-97088e147c1d"}'`
+`ansible-playbook -i "<ip_address>," vault.yml --extra-vars '{"vault_token":"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"}'`
 
-or the other way is to store vault_token value in continues integration tool and use this value in you jenkins job or Jenkinsfile.
+or the other way is to store vault_token value in continues integration tool and pass this value in your jenkins job or Jenkinsfile like this:
+
+```withCredentials([[$class: 'StringBinding', credentialsId: 'vault_token', variable: 'VAULT_TOKEN']])
+  {
+    sh '''
+    ansible-playbook ./master.yml -i "<ip_address>," --extra-vars "env=$ENV"
+    '''
+  }
+```
 
 If you provide correct vault token and the vault is unsealed, during the second cycle the role will provision the vault. All backends, containers, keys and values, policies, tokens will be created.
 
@@ -354,7 +365,7 @@ Let's do the same with your root_token:
 
 The result of the above command will be your decrypted key which is necessary to further Vault provisioning process - deployment backends, tokens and secrets into Vault. Like i mentioned before root token will be necessary during the second cycle of Vault provisioning and you have to pass root token to ansible as an extra vars:
 
-`ansible-playbook -i "<ip_address>," vault.yml --extra-vars '{"vault_token":"de4cdf73-3b4d-4762-09f5-97088e147c1d"}'`
+`ansible-playbook -i "<ip_address>," vault.yml --extra-vars '{"vault_token":"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"}'`
 
 Notice: If `vault_token` variable is empty then second provision cycle will be skipped.
 
@@ -380,11 +391,11 @@ Intialization with root token and keys encryption:
 
 ##### Create backend named test
 
-`curl -H "X-Vault-Token: 95211491-8aa6-276f-244c-b928fad2db6b" -H "Content-Type: application/json" -X POST -d '{"type":"generic"}' http://127.0.0.1:8200/v1/sys/mounts/test`
+`curl -H "X-Vault-Token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" -H "Content-Type: application/json" -X POST -d '{"type":"generic"}' http://127.0.0.1:8200/v1/sys/mounts/test`
 
 ##### Get list of accessor tokens
 
-`curl -H "X-Vault-Token: 8fed6929-55c4-2a89-64b9-2b024f264bee" -X LIST  http://127.0.0.1:8200/v1/auth/token/accessors`
+`curl -H "X-Vault-Token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" -X LIST  http://127.0.0.1:8200/v1/auth/token/accessors`
 
 ##### Get list of policies
 
@@ -392,7 +403,7 @@ Intialization with root token and keys encryption:
 
 ##### Create container named "example" in secret backend and output all these key*, vaules* in the "example" container.
 
-`curl -H "X-Vault-Token: c5a83750-9f58-4a8e-da5e-285189a698e8" -H "Content-Type: application/json" -X POST -d '{"key1":"value1", "key2": "value2"}' http://127.0.0.1:8200/v1/secret/example`
+`curl -H "X-Vault-Token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" -H "Content-Type: application/json" -X POST -d '{"key1":"value1", "key2": "value2"}' http://127.0.0.1:8200/v1/secret/example`
 
 ## Test
 
