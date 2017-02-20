@@ -1,0 +1,10 @@
+---
+- name: Generate sysvinit file
+  template:
+    src: vault.sysvinit.j2
+    dest: "/etc/init.d/vault"
+    owner: "root"
+    group: "root"
+    mode: 0755
+  become: true
+  when: vault_service_enabled == true

@@ -1,4 +1,4 @@
 ---
-# tasks file for vault-provision 
+# tasks file for vault-provision
 - include: install.yml
 - include: provision.yml

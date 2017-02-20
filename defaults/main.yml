@@ -27,6 +27,8 @@ content_type: application/json
 vault_user: vault
 vault_group: vault
 
+vault_service_enabled: true
+
 backend_type: file
 
 ### ########################################################### ###

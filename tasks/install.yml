@@ -52,14 +52,11 @@
   become: true
   when: not vault_configuration.disable_mlock
 
-- name: Generate systemd file
-  template:
-    src: vault.service.j2
-    dest: "/etc/systemd/system/vault.service"
-    owner: "{{ vault_user }}"
-    group: "{{ vault_group }}"
-    mode: 0644
-  become: true
+- include: setup-RedHat-6.yml
+  when: ansible_distribution_major_version == '6'
+
+- include: setup-RedHat-7.yml
+  when: ansible_distribution_major_version == '7'
 
 - name: Generate config
   template:
@@ -77,4 +74,4 @@
     state: restarted
     enabled: yes
   become: true
-  when: generate_config.changed
+  when: generate_config.changed and vault_service_enabled == true

@@ -1,0 +1,10 @@
+---
+- name: Generate systemd file
+  template:
+    src: vault.service.j2
+    dest: "/etc/systemd/system/vault.service"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: 0644
+  become: true
+  when: vault_service_enabled == true
