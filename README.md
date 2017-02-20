@@ -1,6 +1,6 @@
 # Vault-Provision
 
-The Ansible role for install and configure vault and then provision variables on it. Module supports RHEL/Centos7/Fedora for now. The role will be extended in the future and will support Debian/Ubuntu and other operating systems.
+The Ansible role for install and configure vault and then provision variables on it. Module supports RHEL/Centos6+7/Fedora for now. The role will be extended in the future and will support Debian/Ubuntu and other operating systems.
 
 ## Requirements
 
@@ -39,6 +39,8 @@ content_type: application/json # The content type of the http body request
 
 vault_user: vault # Group which is allowed to run vault service
 vault_group: vault # User which is allowed to run vault service
+
+vault_service_enabled: true # Controls whether systemd/init scripts are installed and service automatically started
 
 backend_type: file # backend used by you. All possible supported backends are listed at [`https://www.vaultproject.io/docs/config/index.html`](https://www.vaultproject.io/docs/config/index.html).
 ```
