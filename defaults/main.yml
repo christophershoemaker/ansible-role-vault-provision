@@ -48,6 +48,7 @@ vault_configuration:
       service_tags:
       token:
       max_parallel:
+      consistency_mode:
       tls_skip_verify:
       tls_min_version:
       tls_ca_file:
