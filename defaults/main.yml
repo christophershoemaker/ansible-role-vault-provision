@@ -28,6 +28,7 @@ vault_user: vault
 vault_group: vault
 
 vault_service_enabled: true
+vault_log_dir: /var/log/vault
 
 backend_type: file
 

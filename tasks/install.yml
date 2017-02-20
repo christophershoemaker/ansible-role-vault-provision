@@ -52,6 +52,14 @@
   become: true
   when: not vault_configuration.disable_mlock
 
+- name: create log directory
+  file:
+    state: directory
+    path: "{{ vault_log_dir }}"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: 0755
+
 - include: setup-RedHat-6.yml
   when: ansible_distribution_major_version == '6'
 

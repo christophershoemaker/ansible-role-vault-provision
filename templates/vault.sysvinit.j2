@@ -27,6 +27,7 @@ user="{{ vault_user }}"
 exec="{{ vault_app_install_dir }}/$prog"
 pidfile="/var/run/$prog.pid"
 lockfile="/var/lock/subsys/$prog"
+logfile="{{ vault_log_dir }}/${prog}.log"
 confdir="{{ vault_app_install_dir }}"
 config="{{ vault_app_install_dir }}/config.hcl"
 
@@ -53,7 +54,7 @@ start() {
     daemon \
         --pidfile=$pidfile \
         --user=$user \
-        " { $exec server -config $config & } ; echo \$! >| $pidfile "
+        " { $exec server -config $config &>> $logfile & } ; echo \$! >| $pidfile "
 
     RETVAL=$?
     echo
