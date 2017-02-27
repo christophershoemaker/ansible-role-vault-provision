@@ -7,4 +7,3 @@
     group: "{{ vault_group }}"
     mode: 0644
   become: true
-  when: vault_service_enabled == true

@@ -61,10 +61,10 @@
     mode: 0755
 
 - include: setup-RedHat-6.yml
-  when: ansible_distribution_major_version == '6'
+  when: (ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux') and ansible_distribution_major_version|int == 6
 
 - include: setup-RedHat-7.yml
-  when: ansible_distribution_major_version == '7'
+  when: not ((ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux') and ansible_distribution_major_version|int == 6)
 
 - name: Generate config
   template:
@@ -80,6 +80,6 @@
   service:
     name: vault
     state: restarted
-    enabled: yes
+    enabled: "{{ vault_service_enabled }}"
   become: true
-  when: generate_config.changed and vault_service_enabled == true
+  when: generate_config.changed

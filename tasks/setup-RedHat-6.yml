@@ -7,4 +7,3 @@
     group: "root"
     mode: 0755
   become: true
-  when: vault_service_enabled == true
