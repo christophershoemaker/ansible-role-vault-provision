@@ -27,6 +27,9 @@ content_type: application/json
 vault_user: vault
 vault_group: vault
 
+vault_service_enabled: true
+vault_log_dir: /var/log/vault
+
 backend_type: file
 
 ### ########################################################### ###
@@ -45,6 +48,7 @@ vault_configuration:
       service_tags:
       token:
       max_parallel:
+      consistency_mode:
       tls_skip_verify:
       tls_min_version:
       tls_ca_file:
