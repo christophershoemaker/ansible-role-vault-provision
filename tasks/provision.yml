@@ -101,7 +101,7 @@
   uri:
     url: "{{ method }}://{{ vault_domain_name }}:{{ vault_configuration.listener.tcp.address.split(':')[1] }}/{{ vault_api_version }}/sys/mounts/{{ item.backend_name }}"
     method: POST
-    body: "{ \"type\": \"{{ item.type }}\"{%if item.description is defined %}, \"description\": \"{{ item.description }}\"{% endif %}{% if item.max_lease_ttl is defined %}, \"config\": { \"max_lease_ttl\": \"{{ item.max_lease_ttl }}\" }{% endif %} }"
+    body: "{{ item.configuration }}"
     body_format: json
     status_code: 204
     headers:

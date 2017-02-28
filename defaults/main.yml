@@ -12,8 +12,8 @@ vault_app_platform : 'linux_amd64'
 vault_app_install_dir : '/opt/vault'
 
 vault_app: vault
-vault_app_ver: '0.6.4'
-vault_app_checksum: sha256:04d87dd553aed59f3fe316222217a8d8777f40115a115dac4d88fac1611c51a6
+vault_app_ver: '0.6.5'
+vault_app_checksum: sha256:c9d414a63e9c4716bc9270d46f0a458f0e9660fd576efb150aede98eec16e23e
 
 vault_app_name : '{{vault_app}}_{{vault_app_ver}}_{{vault_app_platform}}'
 vault_app_zip : '{{vault_app_name}}.zip'
@@ -166,7 +166,11 @@ vault_configuration:
 
 backends:
   - backend_name: secret
-    type: generic
+    configuration:
+      type: generic
+      description: This backend stores credentials of users
+      config:
+        max_lease_ttl: 4000
     path: secret
     secrets:
       - container_name: authcredentials
@@ -179,7 +183,11 @@ backends:
           key_name: encryptedkey
           key_for_mail: enctryptedkeyformail
   - backend_name: test
-    type: generic
+    configuration:
+      type: generic
+      #description:
+      #config:
+        #max_lease_ttl:
     path: test
     secrets:
       - container_name: test_container

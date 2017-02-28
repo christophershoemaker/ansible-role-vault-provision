@@ -59,6 +59,7 @@
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
     mode: 0755
+  become: true
 
 - include: setup-RedHat-6.yml
   when: (ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux') and ansible_distribution_major_version|int == 6

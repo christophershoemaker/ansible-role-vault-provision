@@ -1,4 +1,10 @@
 ---
+- name: Install libselinux-python # http://docs.ansible.com/ansible/intro_installation.html - If you have SELinux enabled on remote nodes, you will also want to install libselinux-python on them before using any copy/file/template related functions in Ansible. You can of course still use the yum module in Ansible to install this package on remote systems that do not have it.
+  yum:
+    name: libselinux-python
+    state: latest
+  become: true
+
 - name: Generate sysvinit file
   template:
     src: vault.sysvinit.j2

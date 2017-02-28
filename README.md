@@ -40,7 +40,7 @@ content_type: application/json # The content type of the http body request
 vault_user: vault # Group which is allowed to run vault service
 vault_group: vault # User which is allowed to run vault service
 
-vault_service_enabled: true # Controls whether systemd/init scripts are installed and service automatically started
+vault_service_enabled: true # Controls whether service automatically started
 
 backend_type: file # backend used by you. All possible supported backends are listed at [`https://www.vaultproject.io/docs/config/index.html`](https://www.vaultproject.io/docs/config/index.html).
 ```
@@ -68,6 +68,7 @@ vault_configuration:
       service_tags:
       token:
       max_parallel:
+      consistency_mode:
       tls_skip_verify:
       tls_min_version:
       tls_ca_file:
@@ -189,7 +190,11 @@ vault_configuration:
 
 backends: # Define backends which will be created
   - backend_name: secret # Backend named secret will be created if doesn't exist
-    type: generic # Type of the backend
+    configuration:
+      type: generic # Type of the backend
+      description: This backend stores credentials of users # Description
+      config:
+        max_lease_ttl: 4000 # Max TTL time
     path: secret # Vault internal path where backend will be mounted 
     secrets: # Set of data container which will be created
       - container_name: authcredentials # Data container named authcredentials
@@ -202,7 +207,8 @@ backends: # Define backends which will be created
           key_name: encryptedkey
           key_for_mail: enctryptedkeyformail
   - backend_name: test # Backend named test will be created if doesn't exist
-    type: generic # Type of the backend
+    configuration:
+      type: generic # Type of the backend
     path: test # Vault internal path where backend will be mounted
     secrets: # Set of data container which will be created
       - container_name: test_container # Data container named test_container
@@ -238,7 +244,8 @@ When you have Vault unsealed then decrypt vault root token and put decrypted val
 
 or the other way is to store vault_token value in continues integration tool and pass this value in your jenkins job or Jenkinsfile like this:
 
-```withCredentials([[$class: 'StringBinding', credentialsId: 'vault_token', variable: 'VAULT_TOKEN']])
+```
+withCredentials([[$class: 'StringBinding', credentialsId: 'vault_token', variable: 'VAULT_TOKEN']])
   {
     sh '''
     ansible-playbook ./master.yml -i "<ip_address>," --extra-vars "env=$ENV"
@@ -274,7 +281,11 @@ You have to also define backends, secrets, policies which you would like to put 
 
 ```backends:
   - backend_name: secret
-    type: generic
+    configuration:
+      type: generic
+      description: This backend stores credentials of users
+      config:
+        max_lease_ttl: 4000
     path: secret
     secrets:
       - container_name: authcredentials
@@ -287,7 +298,11 @@ You have to also define backends, secrets, policies which you would like to put 
           key_name: encryptedkey
           key_for_mail: enctryptedkeyformail
   - backend_name: test
-    type: generic
+    configuration:
+      type: generic
+      #description:
+      #config:
+        #max_lease_ttl:
     path: test
     secrets:
       - container_name: test_container
@@ -418,6 +433,15 @@ The playbook `test.yml` applies the role to a VM, setting role variables.
 
 vagrant provision should be running twice. First cycle is for initialization process. Then you have to unseal Vault. In second cycle you need to provide correct root token (decrypted by your private part of PGP or GPG key) in `extra_vars.yml` file.
 
+Since now the box name is passed to Vagrantfile by parameter. You can test your changes on few different boxes by running for example:
+
+```
+vagrant --box=centos/6 up
+vagrant --box=centos/7 up
+vagrant --box=fedora/25-cloud-base up
+```
+
+If you skip box name default one will be used - centos/7.
 
 ## Feedback, bug-reports, requests, ...
 
