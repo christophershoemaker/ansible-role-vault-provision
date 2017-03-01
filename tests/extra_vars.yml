@@ -1,2 +1,5 @@
 ---
 vault_token: ""
+
+# Since ansible 2.2 support for python 3 
+#ansible_python_interpreter: /usr/bin/python3
